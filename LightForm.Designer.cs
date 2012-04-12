@@ -1,6 +1,6 @@
 ﻿namespace focus
 {
-    partial class Form2
+    partial class LightForm
     {
         /// <summary>
         /// Required designer variable.

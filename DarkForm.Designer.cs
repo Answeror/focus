@@ -1,6 +1,6 @@
 ﻿namespace focus
 {
-    partial class Form1
+    partial class DarkForm
     {
         /// <summary>
         /// Required designer variable.

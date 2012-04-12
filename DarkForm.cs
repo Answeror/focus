@@ -11,7 +11,7 @@ using System.Runtime.InteropServices;
 
 namespace focus
 {
-    public partial class Form1 : Form
+    public partial class DarkForm : Form
     {
         MovablePython.Hotkey hotkey = new MovablePython.Hotkey();
         MovablePython.Hotkey catchEsc = new MovablePython.Hotkey();
@@ -20,9 +20,19 @@ namespace focus
         private NotifyIcon trayIcon = new NotifyIcon();
         private ContextMenu trayMenu = new ContextMenu();
 
-        public Form1()
+        public DarkForm()
         {
             InitializeComponent();
+
+            this.pictureBox1.MouseWheel += new MouseEventHandler(panel1_MouseWheel);
+        }
+
+        private void panel1_MouseWheel(object sender, MouseEventArgs e)
+        {
+            if (e.Delta != 0)
+            {
+                this.Opacity = Math.Min(1, Math.Max(0, this.Opacity + e.Delta / 12000.0));
+            }
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -35,9 +45,9 @@ namespace focus
             this.TopMost = true;
             this.FormBorderStyle = FormBorderStyle.None;
             this.Opacity = 0.5;
-            this.TransparencyKey = System.Drawing.SystemColors.Control;
+            //this.TransparencyKey = System.Drawing.SystemColors.Control;
             //this.TopLevel = true;
-//this.TransparencyKey = Color.FromArgb(255, 220, 33, 55);
+            //this.TransparencyKey = Color.FromArgb(255, 220, 33, 55);
             //this.TransparencyKey = System.Drawing.SystemColors.Control;
             this.BackColor = Color.Black;
             this.TransparencyKey = Color.Red;
@@ -47,7 +57,7 @@ namespace focus
 
             MdiClient Client = new MdiClient();
             this.Controls.Add(Client);
-            Form Child = new Form2();
+            Form Child = new LightForm();
 
             Child.Size = new Size(100, 100);
             //Child.FormBorderStyle = FormBorderStyle.SizableToolWindow;

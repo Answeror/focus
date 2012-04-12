@@ -9,9 +9,9 @@ using System.Windows.Forms;
 
 namespace focus
 {
-    public partial class Form2 : Form
+    public partial class LightForm : Form
     {
-        public Form2()
+        public LightForm()
         {
             InitializeComponent();
             this.FormBorderStyle = FormBorderStyle.None;
