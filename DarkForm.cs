@@ -15,6 +15,7 @@ namespace focus
     {
         MovablePython.Hotkey hotkey = new MovablePython.Hotkey();
         MovablePython.Hotkey catchEsc = new MovablePython.Hotkey();
+        MovablePython.Hotkey catchSave = new MovablePython.Hotkey();
         //ForegroundTracker tracker = new ForegroundTracker();
         IntPtr target = IntPtr.Zero;
         private NotifyIcon trayIcon = new NotifyIcon();
@@ -31,8 +32,50 @@ namespace focus
         {
             if (e.Delta != 0)
             {
-                this.Opacity = Math.Min(1, Math.Max(0, this.Opacity + e.Delta / 12000.0));
+                Properties.Settings.Default.Opacity =
+                    Math.Min(1, Math.Max(0, Properties.Settings.Default.Opacity + e.Delta / 12000.0));
             }
+        }
+
+        bool Foreground
+        {
+            get
+            {
+                var target = GetForegroundWindow();
+                return target == this.Handle;
+            }
+        }
+
+        private void InitHotkeys()
+        {
+            hotkey.Control = true;
+            hotkey.Alt = true;
+            hotkey.KeyCode = Keys.F;
+            //hotkey.Windows = true;
+            hotkey.Pressed += delegate { Follow(); };
+            hotkey.Register(this);
+
+            catchEsc.KeyCode = Keys.Escape;
+            catchEsc.Pressed += delegate
+            {
+                if (Foreground)
+                {
+                    DetachFromTarget();
+                }
+            };
+            catchEsc.Register(this);
+
+            catchSave.KeyCode = Keys.S;
+            catchSave.Control = true;
+            catchSave.Pressed += delegate
+            {
+                MessageBox.Show(Properties.Settings.Default.Opacity.ToString());
+                if (Foreground)
+                {
+                    Properties.Settings.Default.Save();
+                }
+            };
+            catchSave.Register(this);
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -44,7 +87,7 @@ namespace focus
             this.TopMost = false;
             this.TopMost = true;
             this.FormBorderStyle = FormBorderStyle.None;
-            this.Opacity = 0.5;
+            //this.Opacity = Properties.Settings.Default.Opacity;
             //this.TransparencyKey = System.Drawing.SystemColors.Control;
             //this.TopLevel = true;
             //this.TransparencyKey = Color.FromArgb(255, 220, 33, 55);
@@ -71,28 +114,12 @@ namespace focus
             Child.Show();
 
 
-            hotkey.Control = true;
-            hotkey.Alt = true;
-            hotkey.KeyCode = Keys.F;
-            //hotkey.Windows = true;
-            hotkey.Pressed += delegate { Follow(); };
-            hotkey.Register(this);
-
-            catchEsc.KeyCode = Keys.Escape;
-            catchEsc.Pressed += delegate
-            {
-                var target = GetForegroundWindow();
-                if (target == this.Handle)
-                {
-                    DetachFromTarget();
-                }
-            };
-            catchEsc.Register(this);
+            InitHotkeys();
 
             //this.Hide();
             trayMenu.MenuItems.Add("Exit", delegate { this.Close(); });
             trayIcon.Text = "focus";
-            trayIcon.Icon = new Icon(SystemIcons.Application, 40, 40);
+            trayIcon.Icon = new Icon(Properties.Resources._32, 32, 32);
             trayIcon.ContextMenu = trayMenu;
             trayIcon.Visible = true;
 

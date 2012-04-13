@@ -41,13 +41,15 @@
             this.pictureBox1.TabIndex = 0;
             this.pictureBox1.TabStop = false;
             // 
-            // Form1
+            // DarkForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(284, 262);
             this.Controls.Add(this.pictureBox1);
-            this.Name = "Form1";
+            this.DataBindings.Add(new System.Windows.Forms.Binding("Opacity", global::focus.Properties.Settings.Default, "Opacity", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.Name = "DarkForm";
+            this.Opacity = global::focus.Properties.Settings.Default.Opacity;
             this.Text = "Form1";
             this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
