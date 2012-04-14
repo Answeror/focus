@@ -16,6 +16,7 @@ namespace focus
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new DarkForm());
+            Properties.Settings.Default.Save();
         }
     }
 }

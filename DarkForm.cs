@@ -9,10 +9,15 @@ using System.Windows.Forms;
 using System.Runtime.InteropServices;
 //using System.Drawing.Drawing2D;
 
+using MovablePython;
+
 namespace focus
 {
     public partial class DarkForm : Form
     {
+        private const int GWL_STYLE = (-16);
+        private const int GWL_EXSTYLE = (-20);
+
         MovablePython.Hotkey hotkey = new MovablePython.Hotkey();
         MovablePython.Hotkey catchEsc = new MovablePython.Hotkey();
         MovablePython.Hotkey catchSave = new MovablePython.Hotkey();
@@ -20,12 +25,34 @@ namespace focus
         IntPtr target = IntPtr.Zero;
         private NotifyIcon trayIcon = new NotifyIcon();
         private ContextMenu trayMenu = new ContextMenu();
+        Hotkey catchSolid = new Hotkey();
+        DateTime lastPressTime = DateTime.Now;
+        Options options;
+
+        bool Foreground
+        {
+            get
+            {
+                var target = GetForegroundWindow();
+                return target == this.Handle;
+            }
+        }
 
         public DarkForm()
         {
             InitializeComponent();
 
-            this.pictureBox1.MouseWheel += new MouseEventHandler(panel1_MouseWheel);
+            pictureBox1.MouseWheel += new MouseEventHandler(panel1_MouseWheel);
+
+            ShowInTaskbar = false;
+            //pictureBox1.BackColor = Color.Red;
+            //BackColor = Color.FromArgb(120, Color.Black);
+            FormBorderStyle = FormBorderStyle.None;
+            BackColor = Color.Black;
+            TransparencyKey = Color.Red;
+            InitLightForm();
+            InitHotkeys();
+            InitTray();
         }
 
         private void panel1_MouseWheel(object sender, MouseEventArgs e)
@@ -37,23 +64,25 @@ namespace focus
             }
         }
 
-        bool Foreground
+        private void ResetCatchToggle()
         {
-            get
+            //hotkey.Unregister();
+            if (hotkey.Registered)
             {
-                var target = GetForegroundWindow();
-                return target == this.Handle;
+                hotkey.Unregister();
             }
+            hotkey = new Hotkey();
+            hotkey.Control = Properties.Settings.Default.Control;
+            hotkey.Shift = Properties.Settings.Default.Shift;
+            hotkey.Alt = Properties.Settings.Default.Alt;
+            hotkey.KeyCode = (Keys)(byte)char.ToUpper(Properties.Settings.Default.Key[0]);
+            hotkey.Pressed += delegate { Follow(); };
+            hotkey.Register(this);
         }
 
         private void InitHotkeys()
         {
-            hotkey.Control = true;
-            hotkey.Alt = true;
-            hotkey.KeyCode = Keys.F;
-            //hotkey.Windows = true;
-            hotkey.Pressed += delegate { Follow(); };
-            hotkey.Register(this);
+            ResetCatchToggle();
 
             catchEsc.KeyCode = Keys.Escape;
             catchEsc.Pressed += delegate
@@ -69,37 +98,32 @@ namespace focus
             catchSave.Control = true;
             catchSave.Pressed += delegate
             {
-                MessageBox.Show(Properties.Settings.Default.Opacity.ToString());
                 if (Foreground)
                 {
                     Properties.Settings.Default.Save();
                 }
             };
             catchSave.Register(this);
+
+            catchSolid.KeyCode = Keys.CapsLock;
+            catchSolid.Pressed += delegate
+            {
+                if ((DateTime.Now - lastPressTime).TotalSeconds < 0.5)
+                {
+                    int old = NativeMethods.GetWindowLong(Handle, GWL_EXSTYLE);
+                    int flag = (int)(WindowStyles.WS_EX_TRANSPARENT);
+                    NativeMethods.SetWindowLong(Handle, GWL_EXSTYLE,
+                        (old & flag) != 0 ? old & ~flag : old | flag);
+                }
+                lastPressTime = DateTime.Now;
+            };
+            catchSolid.Register(this);
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+        private void InitLightForm()
         {
-            this.Visible = false;
-            this.ShowInTaskbar = false;
-
-            //NativeMethods.MakeTopMost(this);
-            this.TopMost = false;
-            this.TopMost = true;
-            this.FormBorderStyle = FormBorderStyle.None;
-            //this.Opacity = Properties.Settings.Default.Opacity;
-            //this.TransparencyKey = System.Drawing.SystemColors.Control;
-            //this.TopLevel = true;
-            //this.TransparencyKey = Color.FromArgb(255, 220, 33, 55);
-            //this.TransparencyKey = System.Drawing.SystemColors.Control;
-            this.BackColor = Color.Black;
-            this.TransparencyKey = Color.Red;
-            //SetStyle(ControlStyles.SupportsTransparentBackColor, true);
-            //SetStyle(ControlStyles.Opaque, true);
-            //this.BackColor = Color.Transparent;
-
             MdiClient Client = new MdiClient();
-            this.Controls.Add(Client);
+            Controls.Add(Client);
             Form Child = new LightForm();
 
             Child.Size = new Size(100, 100);
@@ -109,48 +133,47 @@ namespace focus
             Child.MinimizeBox = false;
 
             Child.MdiParent = this;
-            this.pictureBox1.Controls.Add(Child);
-
+            pictureBox1.Controls.Add(Child);
             Child.Show();
+        }
 
-
-            InitHotkeys();
-
-            //this.Hide();
+        private void InitTray()
+        {
+            trayMenu.MenuItems.Add("Options", delegate
+            {
+                if (options == null)
+                {
+                    options = new Options();
+                    options.UpdateSettings += delegate
+                    {
+                        //Properties.Settings.Default.Save();
+                        ResetCatchToggle();
+                    };
+                }
+                options.Show();
+            });
             trayMenu.MenuItems.Add("Exit", delegate { this.Close(); });
             trayIcon.Text = "focus";
             trayIcon.Icon = new Icon(Properties.Resources._32, 32, 32);
             trayIcon.ContextMenu = trayMenu;
             trayIcon.Visible = true;
-
-            //tracker.ForgroundChanged += delegate (IntPtr hwnd)
-            //{
-            //    if (hwnd != this.Handle)
-            //    {
-            //        if (hwnd == this.target)
-            //        {
-            //            AttachToTarget(this.target);
-            //        }
-            //        else
-            //        {
-            //            this.Hide();
-            //        }
-            //    }
-            //};
         }
 
-        //private void Form1_Paint(object sender, PaintEventArgs e)
-        //{
-        //    var hb = new HatchBrush(HatchStyle.Percent50, this.TransparencyKey);
+        private void BecomeTopmost()
+        {
+            TopMost = false;
+            TopMost = true;
+        }
 
-        //    e.Graphics.FillRectangle(hb, this.DisplayRectangle);
-        //}
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            //Hide();
+            Location = new Point(881222, 881222);
+            BecomeTopmost();
+        }
 
         [DllImport("user32.dll")]
         static extern IntPtr GetForegroundWindow();
-
-        [DllImport("user32.dll")]
-        static extern int GetWindowText(IntPtr hWnd, StringBuilder text, int count);
 
         [DllImport("user32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
@@ -165,30 +188,43 @@ namespace focus
             public int Bottom;
         }
 
-        void AttachToTarget(IntPtr target)
+        private bool ExistTargetToAttach
+        {
+            get
+            {
+                return this.target != GetForegroundWindow() && !Foreground;
+            }
+        }
+
+        private void AttachToTarget(IntPtr target)
         {
             this.target = target;
             RECT rect = new RECT();
             GetWindowRect(this.target, ref rect);
-            this.Left = rect.Left;
-            this.Top = rect.Top;
-            this.Width = rect.Right - rect.Left;
-            this.Height = rect.Bottom - rect.Top;
-            this.Show();
+            Left = rect.Left;
+            Top = rect.Top;
+            Width = rect.Right - rect.Left;
+            Height = rect.Bottom - rect.Top;
+            Show();
+            Focus();
         }
 
-        void DetachFromTarget()
+        private void AttachToForground()
+        {
+            AttachToTarget(GetForegroundWindow());
+        }
+
+        private void DetachFromTarget()
         {
             this.target = IntPtr.Zero;
-            this.Hide();
+            Hide();
         }
 
-        void Follow()
+        private void Follow()
         {
-            var target = GetForegroundWindow();
-            if (this.target != target && target != this.Handle)
+            if (ExistTargetToAttach)
             {
-                AttachToTarget(target);
+                AttachToForground();
             }
             else
             {
