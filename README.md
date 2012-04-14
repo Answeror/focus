@@ -2,7 +2,7 @@
 
 Used to create a layer to make you focused.
 
-![focus](/images/snapshot.png)
+![focus](images/snapshot.png)
 
 # Usage
 
