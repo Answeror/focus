@@ -115,6 +115,11 @@ namespace focus
                     int flag = (int)(WindowStyles.WS_EX_TRANSPARENT);
                     NativeMethods.SetWindowLong(Handle, GWL_EXSTYLE,
                         (old & flag) != 0 ? old & ~flag : old | flag);
+                    // get focus if target active
+                    if ((old & flag) != 0 && GetForegroundWindow() == this.target)
+                    {
+                        SetForegroundWindow(Handle);
+                    }
                 }
                 lastPressTime = DateTime.Now;
             };
@@ -175,6 +180,9 @@ namespace focus
 
         [DllImport("user32.dll")]
         static extern IntPtr GetForegroundWindow();
+
+        [DllImport("user32.dll")]
+        public static extern bool SetForegroundWindow(IntPtr hWnd);
 
         [DllImport("user32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
