@@ -1,13 +1,13 @@
 ---
 title: Focus
 author: Answeror
-...
+---
 
 # Focus
 
 Used to create a layer to make you focused.
 
-![focus](https://github.com/Answeror/focus/raw/master/images/snapshot.png)\
+![focus](https://github.com/Answeror/focus/raw/master/images/snapshot.png)
 
 # Usage
 

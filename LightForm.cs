@@ -52,5 +52,30 @@ namespace focus
             base.WndProc(ref m);
         }
 
+        /// <summary>
+        /// Handle hjkl actions.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void LightForm_KeyDown(object sender, KeyEventArgs e)
+        {
+            int offset = (int)Font.GetHeight();
+            if (e.KeyCode == Keys.H)
+            {
+                Location = new Point(Location.X - offset, Location.Y);
+            }
+            else if (e.KeyCode == Keys.J)
+            {
+                Location = new Point(Location.X, Location.Y + offset);
+            }
+            else if (e.KeyCode == Keys.K)
+            {
+                Location = new Point(Location.X, Location.Y - offset);
+            }
+            else if (e.KeyCode == Keys.L)
+            {
+                Location = new Point(Location.X + offset, Location.Y);
+            }
+        }
     }
 }

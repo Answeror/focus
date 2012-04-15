@@ -30,13 +30,14 @@
         {
             this.SuspendLayout();
             // 
-            // Form2
+            // LightForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(284, 262);
-            this.Name = "Form2";
+            this.Name = "LightForm";
             this.Text = "Form2";
+            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.LightForm_KeyDown);
             this.ResumeLayout(false);
 
         }

@@ -10,6 +10,7 @@ using System.Runtime.InteropServices;
 //using System.Drawing.Drawing2D;
 
 using MovablePython;
+using System.Diagnostics;
 
 namespace focus
 {
