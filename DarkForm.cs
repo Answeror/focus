@@ -120,6 +120,11 @@ namespace focus
                     {
                         SetForegroundWindow(Handle);
                     }
+                    // give focus to target if mask has focus now
+                    else if ((old & flag) == 0 && GetForegroundWindow() == Handle)
+                    {
+                        SetForegroundWindow(this.target);
+                    }
                 }
                 lastPressTime = DateTime.Now;
             };
