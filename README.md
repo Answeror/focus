@@ -15,4 +15,9 @@ Press `CTRL` + `ALT` + `F` to toggle layer (can be reset in options form).
 
 Double press `CAPSLOCK` to toggle mouse event transparency.
 
-Scroll middle button to adjust mask darkness.
+In non-transparent mode, you can:
+
+* Scroll middle button to adjust mask darkness.
+* Press `ESC` to close layer.
+* Press `CTRL` + `S` to save settings. (settings will be saved after exit
+  automaticly)

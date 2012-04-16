@@ -20,8 +20,6 @@ namespace focus
         private const int GWL_EXSTYLE = (-20);
 
         MovablePython.Hotkey hotkey = new MovablePython.Hotkey();
-        MovablePython.Hotkey catchEsc = new MovablePython.Hotkey();
-        MovablePython.Hotkey catchSave = new MovablePython.Hotkey();
         //ForegroundTracker tracker = new ForegroundTracker();
         IntPtr target = IntPtr.Zero;
         private NotifyIcon trayIcon = new NotifyIcon();
@@ -29,6 +27,7 @@ namespace focus
         Hotkey catchSolid = new Hotkey();
         DateTime lastPressTime = DateTime.Now;
         Options options;
+        LightForm lightForm;
 
         bool Foreground
         {
@@ -85,26 +84,18 @@ namespace focus
         {
             ResetCatchToggle();
 
-            catchEsc.KeyCode = Keys.Escape;
-            catchEsc.Pressed += delegate
-            {
-                if (Foreground)
+            this.lightForm.KeyDown += (o, e) => {
+                // catch esc
+                if (e.KeyCode == Keys.Escape)
                 {
                     DetachFromTarget();
                 }
-            };
-            catchEsc.Register(this);
-
-            catchSave.KeyCode = Keys.S;
-            catchSave.Control = true;
-            catchSave.Pressed += delegate
-            {
-                if (Foreground)
+                // catch save
+                else if (e.KeyCode == Keys.S && e.Control)
                 {
                     Properties.Settings.Default.Save();
                 }
             };
-            catchSave.Register(this);
 
             catchSolid.KeyCode = Keys.CapsLock;
             catchSolid.Pressed += delegate
@@ -135,17 +126,17 @@ namespace focus
         {
             MdiClient Client = new MdiClient();
             Controls.Add(Client);
-            Form Child = new LightForm();
+            this.lightForm = new LightForm();
 
-            Child.Size = new Size(100, 100);
+            this.lightForm.Size = new Size(100, 100);
             //Child.FormBorderStyle = FormBorderStyle.SizableToolWindow;
-            Child.StartPosition = FormStartPosition.CenterParent;
-            Child.MaximizeBox = false;
-            Child.MinimizeBox = false;
+            this.lightForm.StartPosition = FormStartPosition.CenterParent;
+            this.lightForm.MaximizeBox = false;
+            this.lightForm.MinimizeBox = false;
 
-            Child.MdiParent = this;
-            pictureBox1.Controls.Add(Child);
-            Child.Show();
+            this.lightForm.MdiParent = this;
+            pictureBox1.Controls.Add(this.lightForm);
+            this.lightForm.Show();
         }
 
         private void InitTray()
